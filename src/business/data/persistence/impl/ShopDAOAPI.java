@@ -1,6 +1,6 @@
-package persistence;
+package business.data.persistence.impl;
 
-import business.Shop;
+import business.data.model.Shop;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -9,11 +9,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import com.google.gson.reflect.TypeToken;
 
-public class ShopAPI implements persistence.ShopDAO {
+public class ShopDAOAPI implements business.data.persistence.ShopDAO {
     private final String apiUrl;
     private final Gson gson;
 
-    public ShopAPI() {
+    public ShopDAOAPI() {
         this.apiUrl = "";//cambiar URL al de la api
         this.gson = new Gson();
     }

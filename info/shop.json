@@ -4,22 +4,22 @@
     "description": "La tienda que buscas",
     "year": 1924,
     "model": "A",
-    "total_revenue": 631.21,
+    "totalRevenue": 0.0,
     "catalogue": {
       "products": [
         {
           "name": "Book",
           "category": "b",
-          "max_price": 15.0,
-          "rating": "",
-          "brand": "La casa del libro"
+          "maxPrice": 0.0,
+          "brand": "La casa del libro",
+          "rating": ""
         },
         {
           "name": "Iphone 12",
           "category": "A",
-          "max_price": 899.99,
-          "rating": "",
-          "brand": "Apple"
+          "maxPrice": 0.0,
+          "brand": "Apple",
+          "rating": ""
         }
       ],
       "prices": [
@@ -27,30 +27,30 @@
         799.0
       ]
     },
-    "loyalty_threshold": 0.0,
-    "total_spent_by_client": 0.0
+    "loyaltyThreshold": 0.0,
+    "totalSpentByClient": 0.0
   },
   {
     "name": "Carrefour",
     "description": "Una tienda si más",
     "year": 2012,
     "model": "A",
-    "total_revenue": 228.31,
+    "totalRevenue": 0.0,
     "catalogue": {
       "products": [
         {
           "name": "S10",
           "category": "a",
-          "max_price": 699.89,
-          "rating": "",
-          "brand": "Samsung"
+          "maxPrice": 0.0,
+          "brand": "Samsung",
+          "rating": ""
         },
         {
           "name": "Airpods pro",
           "category": "A",
-          "max_price": 299.0,
-          "rating": "",
-          "brand": "Apple"
+          "maxPrice": 0.0,
+          "brand": "Apple",
+          "rating": ""
         }
       ],
       "prices": [
@@ -58,49 +58,63 @@
         289.0
       ]
     },
-    "loyalty_threshold": 0.0,
-    "total_spent_by_client": 0.0
+    "loyaltyThreshold": 0.0,
+    "totalSpentByClient": 0.0
   },
   {
     "name": "Sorli",
     "description": "Nah",
     "year": 1234,
     "model": "B",
-    "total_revenue": 0.0,
+    "totalRevenue": 0.0,
     "catalogue": {
       "products": [],
       "prices": []
     },
-    "loyalty_threshold": 342.0,
+    "loyaltyThreshold": 0.0,
     "sponsor": "",
-    "total_spent_by_client": 0.0
+    "totalSpentByClient": 0.0
   },
   {
     "name": "Aldi",
     "description": "Frescos",
     "year": 2019,
     "model": "c",
-    "total_revenue": 0.0,
+    "totalRevenue": 0.0,
     "catalogue": {
       "products": [],
       "prices": []
     },
-    "loyalty_threshold": 0.0,
+    "loyaltyThreshold": 0.0,
     "sponsor": "Apple",
-    "total_spent_by_client": 0.0
+    "totalSpentByClient": 0.0
   },
   {
     "name": "Alimerka",
     "description": "Description of Alimerka",
     "year": 2000,
     "model": "A",
-    "total_revenue": 0.0,
+    "totalRevenue": 0.0,
     "catalogue": {
       "products": [],
       "prices": []
     },
-    "loyalty_threshold": 0.0,
+    "loyaltyThreshold": 0.0,
     "sponsor": "",
-    "total_spent_by_client": 0.0
+    "totalSpentByClient": 0.0
+  },
+  {
+    "name": "Supercash",
+    "description": "Description for supercash",
+    "year": 2000,
+    "model": "A",
+    "totalRevenue": 0.0,
+    "catalogue": {
+      "products": [],
+      "prices": []
+    },
+    "loyaltyThreshold": 0.0,
+    "sponsor": "",
+    "totalSpentByClient": 0.0
   }
 ]

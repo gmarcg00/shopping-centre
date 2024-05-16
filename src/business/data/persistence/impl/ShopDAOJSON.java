@@ -1,6 +1,7 @@
-package persistence;
+package business.data.persistence.impl;
 
-import business.Shop;
+import business.data.model.Shop;
+import business.data.persistence.ShopDAO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -11,30 +12,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class ShopJSONDAO implements ShopDAO{
+public class ShopDAOJSON implements ShopDAO {
 
-    private ArrayList<Shop> shopList;
     private final Gson gson;
-    private final Path file_path;
+    private final Path filePath;
+    private ArrayList<Shop> shopList;
 
-    public ShopJSONDAO() throws IOException {
+    public ShopDAOJSON() throws IOException {
         gson = new GsonBuilder().setPrettyPrinting().create();
-        file_path = Paths.get("info/shop.json");
+        filePath = Paths.get("info/shop.json");
         shopList = readShopsFromFile();
         checkShopFile();
     }
+
     public void checkShopFile() throws IOException {
-        if(!new File(file_path.toUri()).exists()){
-            new FileWriter(String.valueOf(file_path));
+        if(!new File(filePath.toUri()).exists()){
+            new FileWriter(String.valueOf(filePath));
         }
     }
+
     public void addShop(Shop shop){
         shopList.add(shop);
         writeShops(shopList);
     }
 
     public void writeShops(ArrayList<Shop> shopList) {
-        try (FileWriter writer = new FileWriter(file_path.toFile())) {
+        try (FileWriter writer = new FileWriter(filePath.toFile())) {
             gson.toJson(shopList, writer);
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,7 +46,7 @@ public class ShopJSONDAO implements ShopDAO{
 
     public ArrayList<Shop> readShopsFromFile() {
         ArrayList<Shop> shopList = new ArrayList<>();
-        try (Reader reader = new FileReader(file_path.toFile())) {
+        try (Reader reader = new FileReader(filePath.toFile())) {
             Type type = new TypeToken<ArrayList<Shop>>(){}.getType();
             shopList = gson.fromJson(reader, type);
             return shopList;
@@ -61,6 +64,7 @@ public class ShopJSONDAO implements ShopDAO{
         }
         return null;
     }
+
     public void updateShopList(Shop shop){
         for(int i=0;i<shopList.size();i++){
             if(shop.getName().equals(shopList.get(i).getName())){

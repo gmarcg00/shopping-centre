@@ -1,19 +1,29 @@
 package presentation;
 
-import business.Catalogue;
-import business.Product;
-import business.Shop;
+import business.data.model.Catalogue;
+import business.data.model.Product;
+import business.data.model.Shop;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UIManager{
+
+    public void apiOrJson(){
+        System.out.println("\n\t1) Use API\n" +
+                "\t2) Use JSON\n" +
+                "\nChoose an option: ");
+    }
+
     public void showMessage (String message) {
         System.out.print(message);
     }
+
     public void searchProducts(){
         System.out.println("Enter your query: ");
     }
-    public void listProducts(ArrayList<Product> products){
+
+    public void listProducts(List<Product> products){
 
         System.out.println("These are the currently available products:\n");
 
@@ -72,7 +82,7 @@ public class UIManager{
     public void checkClearCart(){
         System.out.println("Are you sure you want to clear your cart? ");
     }
-    public void showCart(ArrayList<Product> cart_products,ArrayList<Float> cart_prices){
+    public void showCart(List<Product> cart_products, List<Float> cart_prices){
         System.out.println("Your cart contains the following items:");
         for(int i=0;i<cart_products.size();i++){
             System.out.println("\n\t- "+cart_products.get(i).getName()+" by "+cart_products.get(i).getBrand()+"\n\t  Price: "+cart_prices.get(i)+"\n");

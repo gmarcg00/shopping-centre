@@ -1,19 +1,20 @@
-package persistence;
+package business.data.persistence;
 
-import business.Product;
+import business.data.model.Product;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public interface ProductDAO {
     // Permite agregar un producto al almacenamiento
     void addProduct(Product product);
 
     // Permite eliminar un producto del almacenamiento
-    boolean deleteProduct(String productName);
+    void deleteProduct(String productName);
 
     // Permite obtener todos los productos almacenados
-    ArrayList<Product> getProducts();
+    List<Product> getProducts();
 
     // Permite actualizar un producto en el almacenamiento
     void updateProduct(Product product);

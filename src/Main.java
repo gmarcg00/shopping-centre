@@ -1,20 +1,16 @@
-import api.Server;
-import business.ShopManager;
-import business.CartManager;
-import business.ProductManager;
+
+import business.service.impl.CartManagerImpl;
 import presentation.Controller;
 import presentation.UIManager;
 
 import java.io.IOException;
 
 public class Main {
+
     public static void main(String[] args) throws IOException {
-        Server.start();
-        ShopManager shop_manager = new ShopManager();
-        ProductManager product_manager = new ProductManager();
-        CartManager cart_manager = new CartManager();
-        UIManager ui_manager = new UIManager();
-        Controller controller = new Controller(ui_manager, shop_manager,product_manager,cart_manager);
+        CartManagerImpl cartManager = new CartManagerImpl();
+        UIManager uiManager = new UIManager();
+        Controller controller = new Controller(uiManager,cartManager);
         controller.run();
     }
 }

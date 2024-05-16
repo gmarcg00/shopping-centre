@@ -1,6 +1,6 @@
-package persistence;
+package business.data.persistence;
 
-import business.Shop;
+import business.data.model.Shop;
 
 import java.io.IOException;
 import java.util.ArrayList;

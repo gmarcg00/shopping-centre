@@ -1,140 +1,193 @@
 package presentation;
 
-import business.*;
+import business.data.model.Product;
+import business.data.model.Shop;
+import business.service.impl.CartManagerImpl;
+import business.service.impl.ProductManagerImpl;
+import business.service.impl.ShopManagerImpl;
+import business.service.ProductManager;
+import business.service.ShopManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Controller {
-    private final presentation.UIManager ui_manager;
-    private final ShopManager shop_manager;
-    private final ProductManager product_manager;
-    private final CartManager cart_manager;
+    private final UIManager uiManager;
+    private final CartManagerImpl cartManager;
+
+    private ShopManager shopManager;
+    private ProductManager productManager;
+
     Scanner scanner = new Scanner(System.in);
 
-    public void run() throws IOException {
-        int option;                     //opción del menu principal
-        int sub_menu_option;            //opción de cualquier submenu
 
-        ui_manager.startMenu();         //ejecutar menu bienvenida
-        ui_manager.startMenuApi();
-
-       // if(!product_manager.checkApi()){
-       //     ui_manager.startMenuApiError();
-//
-       //     if(!product_manager.checkProductFile()){
-       //         ui_manager.startMenuError();
-//
-       //     }else{ui_manager.startMenuJson();}
-//
-       // }
-
-        //if(product_manager.checkStatus()){
-            ui_manager.showMessage("Starting program...\n");
-            do {
-                ui_manager.startMenuAccess();               //ejecutar menu de bienvenida
-                option = askForInteger(6);
-                switch (option) {                         //diferentes opciones del menu principal
-                    case 1:
-                        do {
-                            ui_manager.subMenuProducts();
-                            sub_menu_option = askForInteger(3);//ejecutar el submenu de Products y asociar un valor
-                            switch (sub_menu_option) {                //en función de sub_menu_option se ejecuta un apartado u otro
-                                case 1:
-                                    //crear producto nuevo
-                                    newProduct();
-                                    break;
-                                case 2:
-                                    //borrar producto existente si hay productos
-                                    if(!product_manager.getJson().getProducts().isEmpty()) {
-                                        deleteProduct();                //falta implementar y falta parametro
-                                    }else{
-                                        ui_manager.showMessage("(ERROR) There are no products to delete\n\n");
-                                    }
-                                    break;
-                            }
-                        }while(sub_menu_option!=3);
-                        break;
-                    case 2:
-                        do{
-                        ui_manager.subMenuShops();
-                        sub_menu_option=askForInteger(4);
-                            switch (sub_menu_option) {
-                                case 1:
-                                    creaTenda();                         //escribe una tienda en la persistencia
-                                    break;
-                                case 2:
-                                    if(shop_manager.getSize()>0) {
-                                        expandCatalogue();
-                                    }else{
-                                        ui_manager.showMessage("(ERROR) There are no shops yet\n");
-                                    }
-                                    break;
-                                case 3:
-                                    if(shop_manager.getSize()>0) {
-                                        reduceShopCatalogue();
-                                    }else{
-                                        ui_manager.showMessage("(ERROR) There are no shops yet\n");
-                                    }
-                                    break;
-                            }
-                        }while(sub_menu_option!=4);
-                        break;
-                    case 3:
-                        if(product_manager.getSize()>0) {
-                            searchProducts();
-                        }else{ui_manager.showMessage("(ERROR) The products file is empty\n");}
-                            break;
-                    case 4:
-                        listShops();
-                        break;
-                    case 5:
-                        yourCart();
-                        break;
-                    case 6:
-                        ui_manager.exit();
-                        break;
-                }
-            } while (option != 6);
-        //}
+    public Controller(UIManager uiManager, CartManagerImpl cartManager) {
+        this.uiManager = uiManager;
+        this.cartManager = cartManager;
     }
+
+    public void run() throws IOException {
+        int initialMenuOption = 0;
+
+        uiManager.startMenu();         //ejecutar menu bienvenida
+        uiManager.startMenuApi();
+
+        do{
+            uiManager.apiOrJson();
+            initialMenuOption = askForInteger(2);
+            switch (initialMenuOption){
+                case 1:
+                    choosePersistence(1);
+                    break;
+                case 2:
+                    choosePersistence(2);
+                    break;
+                default:
+                    break;
+            }
+        }while(initialMenuOption!=1 && initialMenuOption!=2);
+
+        mainMenu();
+
+
+
+        //if(!product_manager.checkApi()){
+        //    ui_manager.startMenuApiError();
+//
+        //    if(!product_manager.checkProductFile()){
+        //        ui_manager.startMenuError();
+//
+        //    }else{ui_manager.startMenuJson();}
+//
+        //}
+
+        if(productManager.checkStatus()){
+          uiManager.showMessage("Starting program...\n");
+
+        }
+    }
+
+    private void choosePersistence(int option){
+        try {
+            this.productManager = new ProductManagerImpl(option);
+            this.shopManager = new ShopManagerImpl(option);
+        }catch (IOException e){
+            uiManager.showMessage("Error loading the file\n");
+        }
+    }
+
+    private void mainMenu() {
+        int option;                     //opción del menu principal
+        int sub_menu_option;
+        do {
+            uiManager.startMenuAccess();               //ejecutar menu de bienvenida
+            option = askForInteger(6);
+            switch (option) {                         //diferentes opciones del menu principal
+                case 1:
+                    do {
+                        uiManager.subMenuProducts();
+                        sub_menu_option = askForInteger(3);//ejecutar el submenu de Products y asociar un valor
+                        switch (sub_menu_option) {                //en función de sub_menu_option se ejecuta un apartado u otro
+                            case 1:
+                                //crear producto nuevo
+                                newProduct();
+                                break;
+                            case 2:
+                                //borrar producto existente si hay productos
+                                if(!productManager.getProducts().isEmpty()) {
+                                    deleteProduct();                //falta implementar y falta parametro
+                                }else{
+                                    uiManager.showMessage("(ERROR) There are no products to delete\n\n");
+                                }
+                                break;
+                        }
+                    }while(sub_menu_option!=3);
+                    break;
+                case 2:
+                    do{
+                        uiManager.subMenuShops();
+                        sub_menu_option=askForInteger(4);
+                        switch (sub_menu_option) {
+                            case 1:
+                                creaTenda();                         //escribe una tienda en la persistencia
+                                break;
+                            case 2:
+                                if(shopManager.getSize()>0) {
+                                    expandCatalogue();
+                                }else{
+                                    uiManager.showMessage("(ERROR) There are no shops yet\n");
+                                }
+                                break;
+                            case 3:
+                                if(shopManager.getSize()>0) {
+                                    reduceShopCatalogue();
+                                }else{
+                                    uiManager.showMessage("(ERROR) There are no shops yet\n");
+                                }
+                                break;
+                        }
+                    }while(sub_menu_option!=4);
+                    break;
+                case 3:
+                    if(productManager.getSize()>0) {
+                        searchProducts();
+                    }else{
+                        uiManager.showMessage("(ERROR) The products file is empty\n");}
+                    break;
+                case 4:
+                    listShops();
+                    break;
+                case 5:
+                    yourCart();
+                    break;
+                case 6:
+                    uiManager.exit();
+                    break;
+            }
+        } while (option != 6);
+    }
+
+
     public void yourCart() {
         int sub_menu_option;
         String check_out;
-        if(!cart_manager.getCart().getProducts().isEmpty()){
+        if(!cartManager.getCart().getProducts().isEmpty()){
 
-        ui_manager.showCart(cart_manager.getCart().getProducts(),cart_manager.getCart().getPrices());
-        ui_manager.showTotal(cart_manager.calcPrice(cart_manager.getCart())); //por confirmar(mostrar total carrito)
+        uiManager.showCart(cartManager.getCart().getProducts(), cartManager.getCart().getPrices());
+        uiManager.showTotal(cartManager.calcPrice(cartManager.getCart())); //por confirmar(mostrar total carrito)
 
             do{
 
-                ui_manager.showCartSubMenu();
+                uiManager.showCartSubMenu();
                 sub_menu_option=askForInteger(3);
 
-            switch (sub_menu_option){
-                case 1:
-                    ui_manager.checkOut();
-                    check_out = askForString();
-                        if(check_out.equalsIgnoreCase("Yes")){
-                            buy(cart_manager.getCart().getPrices(),cart_manager.getCart().getProducts());
-                            cart_manager.emptyCart();
-                            ui_manager.clearCart();
-                        }
-                    break;
-                case 2:
-                    ui_manager.checkClearCart();
-                    check_out = askForString();
-                        if(check_out.equalsIgnoreCase("Yes")) {
-                            cart_manager.emptyCart();
-                            ui_manager.clearCart();
-                        }
-                    break;
-            }
-        }while(sub_menu_option!=3 && !cart_manager.getCart().getProducts().isEmpty());
-        }else{ui_manager.showMessage("Your cart is empty\n");}
+                switch (sub_menu_option){
+                    case 1:
+                        uiManager.checkOut();
+                        check_out = askForString();
+                            if(check_out.equalsIgnoreCase("Yes")){
+                                buy(cartManager.getCart().getPrices(), cartManager.getCart().getProducts());
+                                cartManager.emptyCart();
+                                uiManager.clearCart();
+                            }
+                        break;
+                    case 2:
+                        uiManager.checkClearCart();
+                        check_out = askForString();
+                            if(check_out.equalsIgnoreCase("Yes")) {
+                                cartManager.emptyCart();
+                                uiManager.clearCart();
+                            }
+                        break;
+                }
+            }while(sub_menu_option!=3 && !cartManager.getCart().getProducts().isEmpty());
+        }else{
+            uiManager.showMessage("Your cart is empty\n");}
     }
-    public void buy(ArrayList<Float> prices, ArrayList<Product> products) {
+
+    public void buy(List<Float> prices, List<Product> products) {
 
         Product product;
         float price;
@@ -147,7 +200,7 @@ public class Controller {
 
             product = products.get(i);
             price = prices.get(i);
-            shop = shop_manager.getShopByProduct(price);
+            shop = shopManager.getShopByProduct(price);
 
             if (shop != null ) {
 
@@ -162,7 +215,7 @@ public class Controller {
                 price = checkIva(price,product.getCategory(),average_rating);
                 shop.updateTotalRevenue(price);
 
-                shop_manager.getJson().updateShopList(shop);
+                shopManager.getJson().updateShopList(shop);
                 prices.set(i,price);
 
                     int index = updated_shops.indexOf(shop);
@@ -196,7 +249,7 @@ public class Controller {
                     amount_updated.remove(j);
                 }
             }
-            ui_manager.showShopRevenue(updated_shops.get(i), amount_updated.get(i));
+            uiManager.showShopRevenue(updated_shops.get(i), amount_updated.get(i));
         }
 
         }
@@ -226,69 +279,71 @@ public class Controller {
         try {
             string = scanner.nextLine();
         } catch (Exception e) {
-            ui_manager.showMessage("You must introduce a valid option");
+            uiManager.showMessage("You must introduce a valid option");
         }
         //convertir a mayuscula la primera letra
         String aux = string.substring(0,1).toUpperCase() + string.substring(1);
         return aux;
 
     }
+
     public void newProduct(){
         String product_name;
 
         //comprobar que el nombre del producto no exista en el archivo
         do{
-            ui_manager.showMessage("Please enter the product’s name: ");
+            uiManager.showMessage("Please enter the product’s name: ");
             product_name = askForString();
-            if(!product_manager.checkProductName(product_name)) {
-                ui_manager.showMessage("This product already exists.\n");
+            if(!productManager.checkProductName(product_name)) {
+                uiManager.showMessage("This product already exists.\n");
             }
-        }while(!product_manager.checkProductName(product_name));
+        }while(!productManager.checkProductName(product_name));
 
-        ui_manager.showMessage("Please enter the product’s brand: ");
+        uiManager.showMessage("Please enter the product’s brand: ");
         String brand_name = askForString();
-        ui_manager.showMessage("Please enter the product’s maximum retail price: ");
+        uiManager.showMessage("Please enter the product’s maximum retail price: ");
         float amount = askForFloat();
-        ui_manager.showMessage("The system supports the following product categories: \n\n");
-        ui_manager.createProduct();
+        uiManager.showMessage("The system supports the following product categories: \n\n");
+        uiManager.createProduct();
         char category=askForCharacter("Please pick the product’s category: ");
         Product product = new Product(product_name,amount,brand_name,category,"");
-        product_manager.getJson().addProduct(product);
-        ui_manager.showMessage("The product \""+product_name+"\" by \""+brand_name+"\" was added to the system. \n\n");
+        productManager.addProduct(product);
+        uiManager.showMessage("The product \""+product_name+"\" by \""+brand_name+"\" was added to the system. \n\n");
     }
+
     public void deleteProduct(){
         int option;
 
         do {
 
-            ui_manager.listProducts(product_manager.getJson().getProducts());         //printear todos los productos del json falta implementar listProducts()
-            option = askForInteger(product_manager.getSize() + 1);
+            uiManager.listProducts(productManager.getJson().getProducts());         //printear todos los productos del json falta implementar listProducts()
+            option = askForInteger(productManager.getSize() + 1);
 
-        }while( option<1 || option > product_manager.getSize()+1);
+        }while( option<1 || option > productManager.getSize()+1);
 
-        if(option<product_manager.getSize()+1) {
+        if(option< productManager.getSize()+1) {
 
-            ui_manager.showMessage("Are you sure you want to remove " + product_manager.getProductByIndex(option - 1).getName() + " by " + product_manager.getProductByIndex(option - 1).getBrand() + "? ");
+            uiManager.showMessage("Are you sure you want to remove " + productManager.getProductByIndex(option - 1).getName() + " by " + productManager.getProductByIndex(option - 1).getBrand() + "? ");
 
             if (askForString().equalsIgnoreCase("Yes")){
-                for(int i = 0 ;i<shop_manager.getSize();i++){
-                    for(int j=0;j<shop_manager.getShopByShopNumber(i).getCatalogue().getProducts().size();j++){
-                        if(shop_manager.getShopByShopNumber(i).getCatalogue().getProducts().get(j).getName().equals(product_manager.getProductByIndex(option - 1).getName())){
-                            Shop shop = shop_manager.getShopByProduct(shop_manager.getShopByShopNumber(i).getCatalogue().getPrices().get(j));
+                for(int i = 0; i< shopManager.getSize(); i++){
+                    for(int j = 0; j< shopManager.getShopByShopNumber(i).getCatalogue().getProducts().size(); j++){
+                        if(shopManager.getShopByShopNumber(i).getCatalogue().getProducts().get(j).getName().equals(productManager.getProductByIndex(option - 1).getName())){
+                            Shop shop = shopManager.getShopByProduct(shopManager.getShopByShopNumber(i).getCatalogue().getPrices().get(j));
                             shop.reduceCatalogue(j);
-                            shop_manager.updateCatalogue(shop);
+                            shopManager.updateCatalogue(shop);
                         }
                     }
                 }
-                ui_manager.deletedProduct(product_manager.getProductByIndex(option - 1).getName(), product_manager.getProductByIndex(option - 1).getBrand());
-                product_manager.deleteProduct(product_manager.getProductByIndex(option - 1));
+                uiManager.deletedProduct(productManager.getProductByIndex(option - 1).getName(), productManager.getProductByIndex(option - 1).getBrand());
+                productManager.deleteProduct(productManager.getProductByIndex(option - 1).getName());
             }
         }
     }
     public char askForCharacter(String string){
             char option;
             do {
-                ui_manager.showMessage(string);
+                uiManager.showMessage(string);
                 option = scanner.nextLine().charAt(0);
             }while(option != 'a' && option!= 'b' && option!='c' && option!='A' && option!='B' && option!='C');
 
@@ -302,11 +357,11 @@ public class Controller {
             if (option > 0 && option <= parameter) {          //si el numero es valido
                 return option;
             } else {
-                ui_manager.showMessage("\tPlease enter a number from 1 to "+parameter+"\n");    //numero no valido
+                uiManager.showMessage("\tPlease enter a number from 1 to "+parameter+"\n");    //numero no valido
             }
         } catch (NumberFormatException e) {
-            ui_manager.showMessage("\n\tYou must introduce a number\n");                //no ha introducido un numero
-            ui_manager.showMessage("\tPlease enter a number from 1 to " + parameter + ": \n");
+            uiManager.showMessage("\n\tYou must introduce a number\n");                //no ha introducido un numero
+            uiManager.showMessage("\tPlease enter a number from 1 to " + parameter + ": \n");
         }
         return option;
     }
@@ -317,44 +372,39 @@ public class Controller {
             if (option > 0 && option<2025) {          //si el numero es valido
                 return option;
             } else {
-                ui_manager.showMessage("Please enter a number bigger than 0 and lower than 2025: ");    //numero no valido
+                uiManager.showMessage("Please enter a number bigger than 0 and lower than 2025: ");    //numero no valido
             }
         } catch (NumberFormatException e) {
-            ui_manager.showMessage("\tYou must introduce a number\n");                //no ha introducido un numero
-            ui_manager.showMessage("\tPlease enter a positive number\n\n");
+            uiManager.showMessage("\tYou must introduce a number\n");                //no ha introducido un numero
+            uiManager.showMessage("\tPlease enter a positive number\n\n");
         }
         return option;
     }
-    public Controller(UIManager ui_manager, ShopManager shop_manager, ProductManager product_manager, CartManager cart_manager) {
-        this.ui_manager = ui_manager;
-        this.shop_manager = shop_manager;
-        this.product_manager = product_manager;
-        this.cart_manager = cart_manager;
-    }
+
     public void expandCatalogue(){
         float amount;
 
-        ui_manager.showMessage("Please enter the shop’s name: ");
+        uiManager.showMessage("Please enter the shop’s name: ");
         String shop_name = askForString();
 
-        if((shop_manager.getShopByName(shop_name)!=null) && shop_name.contains(shop_manager.getShopByName(shop_name).getName())){
+        if((shopManager.getShopByName(shop_name)!=null) && shop_name.contains(shopManager.getShopByName(shop_name).getName())){
 
-            ui_manager.showMessage("Please enter the product’s name: ");
+            uiManager.showMessage("Please enter the product’s name: ");
             String product_name = askForString();
 
-            if((product_manager.getProductByName(product_name)!=null) && product_name.equals(product_manager.getProductByName(product_name).getName())){
+            if((productManager.getProductByName(product_name)!=null) && product_name.equals(productManager.getProductByName(product_name).getName())){
                 do {
-                    ui_manager.showMessage("Please enter the product’s price at this shop: ");
+                    uiManager.showMessage("Please enter the product’s price at this shop: ");
                     amount = askForFloat();
-                    if (amount > product_manager.getProductByName(product_name).getMax_price()) {
-                        ui_manager.showMessage("\nThe price must be lower or equal to it's maximum price.\n");
+                    if (amount > productManager.getProductByName(product_name).getMaxPrice()) {
+                        uiManager.showMessage("\nThe price must be lower or equal to it's maximum price.\n");
                     }
-                } while (amount > product_manager.getProductByName(product_name).getMax_price());
+                } while (amount > productManager.getProductByName(product_name).getMaxPrice());
                 //muestra por pantalla y añade un producto junto al precio al catalogo correspondiente
 
-                Product product = product_manager.getProductByName(product_name);
-                shop_manager.getShopByName(shop_name).expandCatalogue(product,amount);
-                shop_manager.updateCatalogue(shop_manager.getShopByName(shop_name));
+                Product product = productManager.getProductByName(product_name);
+                shopManager.getShopByName(shop_name).expandCatalogue(product,amount);
+                shopManager.updateCatalogue(shopManager.getShopByName(shop_name));
 
             }else{
                 System.out.println("This product doesn't exits");
@@ -366,33 +416,33 @@ public class Controller {
     public void reduceShopCatalogue(){
         int item_to_remove;
 
-        ui_manager.showMessage("Please enter the shop’s name: ");
+        uiManager.showMessage("Please enter the shop’s name: ");
         String shop_name = askForString();
 
-        if((shop_manager.getShopByName(shop_name)!=null) && shop_name.contains(shop_manager.getShopByName(shop_name).getName())){
-            if(shop_manager.getShopByName(shop_name).getCatalogue().getProducts().isEmpty()){
+        if((shopManager.getShopByName(shop_name)!=null) && shop_name.contains(shopManager.getShopByName(shop_name).getName())){
+            if(shopManager.getShopByName(shop_name).getCatalogue().getProducts().isEmpty()){
                 System.out.println("\nThis shop's catalogue is empty.");
             }else{
 
                 do {
-                    ui_manager.showMessage("\nThis shop sells the following products:\n");
-                    ui_manager.showCatalogue(shop_manager.getShopByName(shop_name).getCatalogue());
+                    uiManager.showMessage("\nThis shop sells the following products:\n");
+                    uiManager.showCatalogue(shopManager.getShopByName(shop_name).getCatalogue());
 
-                    ui_manager.showMessage("\n\t" + (shop_manager.getShopByName(shop_name).getCatalogue().getProducts().size() + 1) + ") Back\n\nWhich one would you like to remove? ");
+                    uiManager.showMessage("\n\t" + (shopManager.getShopByName(shop_name).getCatalogue().getProducts().size() + 1) + ") Back\n\nWhich one would you like to remove? ");
 
 
-                    item_to_remove = askForInteger(shop_manager.getShopByName(shop_name).getCatalogue().getProducts().size() + 1);
-                }while(item_to_remove<1 || item_to_remove>shop_manager.getShopByName(shop_name).getCatalogue().getProducts().size()+1);
+                    item_to_remove = askForInteger(shopManager.getShopByName(shop_name).getCatalogue().getProducts().size() + 1);
+                }while(item_to_remove<1 || item_to_remove> shopManager.getShopByName(shop_name).getCatalogue().getProducts().size()+1);
 
-                if(item_to_remove!=shop_manager.getShopByName(shop_name).getCatalogue().getProducts().size()+1) {
+                if(item_to_remove!= shopManager.getShopByName(shop_name).getCatalogue().getProducts().size()+1) {
 
-                    ui_manager.showMessage(shop_manager.getShopByName(shop_name).getCatalogue().getProducts().get(item_to_remove-1).getName()+ " by " + shop_manager.getShopByShopNumber(item_to_remove-1).getCatalogue().getProducts().get(item_to_remove-1).getBrand()+ "is no longer being sold at " + shop_name + ".\n");
-                    shop_manager.getShopByName(shop_name).reduceCatalogue(item_to_remove - 1);
-                    shop_manager.updateCatalogue(shop_manager.getShopByName(shop_name));
+                    uiManager.showMessage(shopManager.getShopByName(shop_name).getCatalogue().getProducts().get(item_to_remove-1).getName()+ " by " + shopManager.getShopByShopNumber(item_to_remove-1).getCatalogue().getProducts().get(item_to_remove-1).getBrand()+ "is no longer being sold at " + shop_name + ".\n");
+                    shopManager.getShopByName(shop_name).reduceCatalogue(item_to_remove - 1);
+                    shopManager.updateCatalogue(shopManager.getShopByName(shop_name));
                 }
             }
         }else{
-            ui_manager.showMessage("\nThis shop doesn't exist.");
+            uiManager.showMessage("\nThis shop doesn't exist.");
         }
         }
     public float askForFloat() {
@@ -403,10 +453,10 @@ public class Controller {
                 if (option >= 0.0) {
                     return option;
                 } else {
-                    ui_manager.showMessage("Please enter a positive number: ");
+                    uiManager.showMessage("Please enter a positive number: ");
                 }
             } catch (NumberFormatException e) {
-                ui_manager.showMessage("You must introduce float\nPlease enter the product's maximum retail price: ");
+                uiManager.showMessage("You must introduce float\nPlease enter the product's maximum retail price: ");
             }
         }
     }
@@ -416,132 +466,132 @@ public class Controller {
         float price = 0;
         ArrayList<Product> found_products = new ArrayList<>();  //arraylist para guardar los productos encontrados
 
-        ui_manager.searchProducts();
+        uiManager.searchProducts();
         String text_to_search = askForString();
 
         //buscar cada elemento que tenga ese string ya sea producto o tienda
         //sabiendo que cada producto puede estar en varias tiendas a precios distintos
 
-        if (product_manager.getProductByName(text_to_search) != null ) {
+        if (productManager.getProductByName(text_to_search) != null ) {
 
-            for (int i = 0; i < product_manager.getSize(); i++) {
+            for (int i = 0; i < productManager.getSize(); i++) {
 
-                if (text_to_search.contains(product_manager.getJson().getProducts().get(i).getName())) {
+                if (text_to_search.contains(productManager.getJson().getProducts().get(i).getName())) {
                     found = 0;
                     num_products++;
-                    found_products.add(product_manager.getJson().getProducts().get(i));
+                    found_products.add(productManager.getJson().getProducts().get(i));
 
                     //lanzar el UI solo una vez al encontrar el primer producto
                     if (num_products == 1) {
-                        ui_manager.showMessage("\nThe following products where found:\n\n");
+                        uiManager.showMessage("\nThe following products where found:\n\n");
                     }
 
-                    ui_manager.showFoundProduct(product_manager.getJson().getProducts().get(i), num_products);
+                    uiManager.showFoundProduct(productManager.getJson().getProducts().get(i), num_products);
 
                     found_shop = 0;
 
-                    for (int k = 0; k < shop_manager.getSize(); k++) {
-                        for (int j = 0; j < shop_manager.getShopByShopNumber(k).getCatalogue().getProducts().size(); j++) {
-                            if (shop_manager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getName().contains(text_to_search)) {
+                    for (int k = 0; k < shopManager.getSize(); k++) {
+                        for (int j = 0; j < shopManager.getShopByShopNumber(k).getCatalogue().getProducts().size(); j++) {
+                            if (shopManager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getName().contains(text_to_search)) {
                                 found_shop++;
                                 if (found_shop == 1) {
-                                    ui_manager.showMessage("\tSold at: \n");
+                                    uiManager.showMessage("\tSold at: \n");
                                 }
 
-                                price = shop_manager.getShopByShopNumber(k).getCatalogue().getPrices().get(j);
+                                price = shopManager.getShopByShopNumber(k).getCatalogue().getPrices().get(j);
 
                                 //si se encuentra el producto en una tienda se añade la tienda
                                 found = 1;
 
-                                ui_manager.showFoundShop(shop_manager.getShopByShopNumber(k).getName(), price);
+                                uiManager.showFoundShop(shopManager.getShopByShopNumber(k).getName(), price);
                             }
                         }
                     }
                     //en el caso que no se encuentre el producto en ninguna tienda
                     if (found == 0) {
-                        ui_manager.showMessage("This product is not currently being sold in any shops.\n");
+                        uiManager.showMessage("This product is not currently being sold in any shops.\n");
                     }
                 }
             }
             //si se han encontrado productos lanzamos el menu de reviews
             subMenuReviews(found_products);
 
-        }else if(product_manager.getProductByBrand(text_to_search)!=null){
+        }else if(productManager.getProductByBrand(text_to_search)!=null){
 
-            for (int i = 0; i < product_manager.getSize(); i++) {
+            for (int i = 0; i < productManager.getSize(); i++) {
 
-            if (text_to_search.contains(product_manager.getJson().getProducts().get(i).getBrand())) {
+            if (text_to_search.contains(productManager.getJson().getProducts().get(i).getBrand())) {
                 found = 0;
                 num_products++;
-                Product product = product_manager.getJson().getProducts().get(i);
+                Product product = productManager.getJson().getProducts().get(i);
                 found_products.add(product);
 
                 //lanzar el UI solo una vez al encontrar el primer producto
                 if (num_products == 1) {
-                    ui_manager.showMessage("\nThe following products where found:\n\n");
+                    uiManager.showMessage("\nThe following products where found:\n\n");
                 }
 
-                ui_manager.showFoundProduct(product, num_products);
+                uiManager.showFoundProduct(product, num_products);
 
                 found_shop = 0;
 
-                for (int k = 0; k < shop_manager.getSize(); k++) {
+                for (int k = 0; k < shopManager.getSize(); k++) {
 
-                    for (int j = 0; j < shop_manager.getShopByShopNumber(k).getCatalogue().getProducts().size(); j++) {
+                    for (int j = 0; j < shopManager.getShopByShopNumber(k).getCatalogue().getProducts().size(); j++) {
 
-                        if (shop_manager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getBrand().contains(text_to_search) && found_products.get(i).getName().equals(shop_manager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getName())) {
+                        if (shopManager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getBrand().contains(text_to_search) && found_products.get(i).getName().equals(shopManager.getShopByShopNumber(k).getCatalogue().getProducts().get(j).getName())) {
 
                                     found_shop++;
                                     if (found_shop == 1) {
-                                        ui_manager.showMessage("\tSold at: \n");
+                                        uiManager.showMessage("\tSold at: \n");
                                     }
 
-                                    price = shop_manager.getShopByShopNumber(k).getCatalogue().getPrices().get(j);
+                                    price = shopManager.getShopByShopNumber(k).getCatalogue().getPrices().get(j);
 
                                     //si se encuentra el producto en una tienda se añade la tienda
                                     found = 1;
 
-                                    ui_manager.showFoundShop(shop_manager.getShopByShopNumber(k).getName(), price);
+                                    uiManager.showFoundShop(shopManager.getShopByShopNumber(k).getName(), price);
 
                         }
                     }
                 }
                 //en el caso que no se encuentre el producto en ninguna tienda
                 if (found == 0) {
-                    ui_manager.showMessage("This product is not currently being sold in any shops.\n");
+                    uiManager.showMessage("This product is not currently being sold in any shops.\n");
                 }
             }
         }
         //si se han encontrado productos lanzamos el menu de reviews
             subMenuReviews(found_products);
         }else{
-            ui_manager.showMessage("(ERROR) Couldn't find any product\n");
+            uiManager.showMessage("(ERROR) Couldn't find any product\n");
         }
     }
     public void subMenuReviews(ArrayList<Product> found_products) {
 
         if (!found_products.isEmpty()) {
 
-            ui_manager.showMessage("\n\t" + (found_products.size() + 1) + ") Back\n");
-            ui_manager.reviews();
+            uiManager.showMessage("\n\t" + (found_products.size() + 1) + ") Back\n");
+            uiManager.reviews();
 
             int product_to_review = askForInteger(found_products.size() + 1);
 
             if (product_to_review != found_products.size() + 1) {
                 Product product = found_products.get(product_to_review-1);
 
-                ui_manager.reviewMenu();
+                uiManager.reviewMenu();
                 int review_option = askForInteger(2);
 
                 switch (review_option) {
                     case 1:
                         if (!product.getRating().isEmpty() && product.getRating() != null) {
-                            ui_manager.showReviews(product.getName(), product.getBrand(), product.getRating());
+                            uiManager.showReviews(product.getName(), product.getBrand(), product.getRating());
                             float average_stars = calcAverageRating(product.getRating());
-                            ui_manager.showMessage("\nAverage rating: "+average_stars+"*\n");
+                            uiManager.showMessage("\nAverage rating: "+average_stars+"*\n");
 
                         } else {
-                            ui_manager.showMessage("There are no reviews for this product yet.\n");
+                            uiManager.showMessage("There are no reviews for this product yet.\n");
                         }
                         break;
                     case 2:
@@ -555,20 +605,20 @@ public class Controller {
         int review_stars;
         String stars;
         do {
-            ui_manager.showMessage("Please rate the product (1-5 stars):");
+            uiManager.showMessage("Please rate the product (1-5 stars):");
             stars = askForString();
             review_stars = stars.length();
         }while(review_stars>5 || review_stars <1);
         stars = review_stars + "* ";
 
-        ui_manager.showMessage("Please add a comment to your review:");
+        uiManager.showMessage("Please add a comment to your review:");
         String review = askForString();
 
-        ui_manager.showMessage("\nThank you for your review of " + product.getName() + " by " + product.getBrand() + ".\n");
+        uiManager.showMessage("\nThank you for your review of " + product.getName() + " by " + product.getBrand() + ".\n");
         //concatenar los strings juntos y añadirlo al rating del producto
         review = stars.concat(review);
 
-        product_manager.addRating(product,review);
+        productManager.addRating(product,review);
     }
     public void creaTenda(){
         int year;
@@ -578,94 +628,94 @@ public class Controller {
 
         //comprobar que el nombre del producto no exista en el archivo
         do{
-            ui_manager.showMessage("Please enter the shop’s name: ");
+            uiManager.showMessage("Please enter the shop’s name: ");
             shop_name = askForString();
-            if(!shop_manager.checkShopName(shop_name)) {
-                ui_manager.showMessage("This shop already exists.\n");
+            if(!shopManager.checkShopName(shop_name)) {
+                uiManager.showMessage("This shop already exists.\n");
             }
-        }while(!shop_manager.checkShopName(shop_name));
+        }while(!shopManager.checkShopName(shop_name));
 
-        ui_manager.showMessage("Please enter the shop’s description: ");
+        uiManager.showMessage("Please enter the shop’s description: ");
         String description = askForString();
-        ui_manager.showMessage("Please enter the shop’s founding year: ");
+        uiManager.showMessage("Please enter the shop’s founding year: ");
         do {
             year = askForInt();
-            ui_manager.showMessage("Please enter the shop’s founding year: ");
+            uiManager.showMessage("Please enter the shop’s founding year: ");
         }while(year<0 || year>2023);
 
-        ui_manager.creaTenda();
+        uiManager.creaTenda();
         char model = askForCharacter("Please pick the shop’s business model: ");
 
         //falta mirar aqui si es de tipo B o tipo C para aplicar el patrocinio o el fidelity threshold
         if(model=='b' || model =='B'){
-            ui_manager.showMessage("Please enter the shop’s loyalty threshold: ");
+            uiManager.showMessage("Please enter the shop’s loyalty threshold: ");
             loyalty_threshold = askForFloat();
         }
         if(model == 'c' || model == 'C'){
-            ui_manager.showMessage("Please enter the shop’s sponsoring brand: ");
+            uiManager.showMessage("Please enter the shop’s sponsoring brand: ");
             sponsor = askForString();
         }
-        ui_manager.showMessage(shop_name+" is now a part of the elCofre family\n");
+        uiManager.showMessage(shop_name+" is now a part of the elCofre family\n");
         Shop shop = new Shop(shop_name,description,year,model,loyalty_threshold,sponsor);
-        shop_manager.addShop(shop);
+        shopManager.addShop(shop);
     }
     public void listShops(){
         int sub_menu_catalogue;
         int index;
 
-        if(shop_manager.getSize()>0) {                                    //comprobar que hay al menos 1 shop
+        if(shopManager.getSize()>0) {                                    //comprobar que hay al menos 1 shop
 
-            ui_manager.listShops(shop_manager.getSize(), shop_manager.getJson().readShopsFromFile());                 //falta implementar la lista y el submenu correspondiente
-            int shop_number = askForInteger(shop_manager.getSize() + 1);
+            uiManager.listShops(shopManager.getSize(), shopManager.getJson().readShopsFromFile());                 //falta implementar la lista y el submenu correspondiente
+            int shop_number = askForInteger(shopManager.getSize() + 1);
 
-            if (shop_number != shop_manager.getSize() + 1) {      //solo se muestra el catalogo si el usuario selecciona cualquier opción menos la de "back"
+            if (shop_number != shopManager.getSize() + 1) {      //solo se muestra el catalogo si el usuario selecciona cualquier opción menos la de "back"
 
-                if (!shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().isEmpty()) {
+                if (!shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().isEmpty()) {
 
-                    ui_manager.showShopDescription(shop_manager.getShopByShopNumber(shop_number - 1).getName(), shop_manager.getShopByShopNumber(shop_number - 1).getDescription(), shop_manager.getShopByShopNumber(shop_number - 1).getYear());
-                    ui_manager.showCatalogue(shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue());   //mostrar catalogo de la tienda en cuestión
-                    ui_manager.showMessage("\n" + (shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1) + ") Back\n");
+                    uiManager.showShopDescription(shopManager.getShopByShopNumber(shop_number - 1).getName(), shopManager.getShopByShopNumber(shop_number - 1).getDescription(), shopManager.getShopByShopNumber(shop_number - 1).getYear());
+                    uiManager.showCatalogue(shopManager.getShopByShopNumber(shop_number - 1).getCatalogue());   //mostrar catalogo de la tienda en cuestión
+                    uiManager.showMessage("\n" + (shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1) + ") Back\n");
 
                     do {
-                        ui_manager.showMessage("\nWhich one are you interested in?\n");
-                        index = askForInteger(shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1);
+                        uiManager.showMessage("\nWhich one are you interested in?\n");
+                        index = askForInteger(shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1);
                     }
-                    while ((index < 1) || (index > shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1));
+                    while ((index < 1) || (index > shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1));
 
-                    if (index!= shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1) {
-                        Product product_to_review = shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1);
+                    if (index!= shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().size() + 1) {
+                        Product product_to_review = shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1);
 
                         do {
-                            ui_manager.subMenuCatalogue();
+                            uiManager.subMenuCatalogue();
                             sub_menu_catalogue = askForInteger(3);
                         } while (sub_menu_catalogue < 1 || sub_menu_catalogue > 3);
 
                         switch (sub_menu_catalogue) {
                             case 1:
-                                if (!product_manager.getProductByName(product_to_review.getName()).getRating().isEmpty() && product_manager.getProductByName(product_to_review.getName()).getRating() != null) {
-                                    ui_manager.showReviews(product_manager.getProductByName(product_to_review.getName()).getName(), product_manager.getProductByName(product_to_review.getName()).getBrand(), product_manager.getProductByName(product_to_review.getName()).getRating());
-                                    float average_stars = calcAverageRating(product_manager.getProductByName(product_to_review.getName()).getRating());
-                                    ui_manager.showMessage("\nAverage rating: "+average_stars+"*\n");
+                                if (!productManager.getProductByName(product_to_review.getName()).getRating().isEmpty() && productManager.getProductByName(product_to_review.getName()).getRating() != null) {
+                                    uiManager.showReviews(productManager.getProductByName(product_to_review.getName()).getName(), productManager.getProductByName(product_to_review.getName()).getBrand(), productManager.getProductByName(product_to_review.getName()).getRating());
+                                    float average_stars = calcAverageRating(productManager.getProductByName(product_to_review.getName()).getRating());
+                                    uiManager.showMessage("\nAverage rating: "+average_stars+"*\n");
                                 } else {
-                                    ui_manager.showMessage("There are no reviews for this product yet.\n");
+                                    uiManager.showMessage("There are no reviews for this product yet.\n");
                                 }
                                 break;
                             case 2:
-                                addReview(product_manager.getProductByName(product_to_review.getName()));
+                                addReview(productManager.getProductByName(product_to_review.getName()));
                                 break;
                             case 3:
                                 //añadir al carrito el producto con su precio respectivo
-                                cart_manager.getCart().addProduct(shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1), shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getPrices().get(index - 1));
-                                ui_manager.addedToCart(shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1).getName(), shop_manager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1).getBrand());
+                                cartManager.getCart().addProduct(shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1), shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getPrices().get(index - 1));
+                                uiManager.addedToCart(shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1).getName(), shopManager.getShopByShopNumber(shop_number - 1).getCatalogue().getProducts().get(index - 1).getBrand());
                                 break;
                         }
                     }
                 } else {
-                        ui_manager.showMessage("There are no products in this shop's catalogue\n");
+                        uiManager.showMessage("There are no products in this shop's catalogue\n");
                     }
                 }
             } else {
-                ui_manager.showMessage("(ERROR) There are no shops yet\n");
+                uiManager.showMessage("(ERROR) There are no shops yet\n");
             }
     }
     public float calcAverageRating(String rating){
