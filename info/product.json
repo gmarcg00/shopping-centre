@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Iphone 12",
+    "category": "A",
+    "max_price": 899.99,
+    "rating": "",
+    "brand": "Apple"
+  },
+  {
+    "name": "Airpods pro",
+    "category": "A",
+    "max_price": 299.0,
+    "rating": "",
+    "brand": "Apple"
+  },
+  {
+    "name": "S10",
+    "category": "a",
+    "max_price": 699.89,
+    "rating": "",
+    "brand": "Samsung"
+  },
+  {
+    "name": "Book",
+    "category": "b",
+    "max_price": 15.0,
+    "rating": "",
+    "brand": "La casa del libro"
+  }
+]
