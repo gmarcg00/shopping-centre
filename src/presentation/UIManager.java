@@ -58,7 +58,8 @@ public class UIManager{
                 "\\___/_/\\____/\\____/_/ /_/ \\___/\n" +
                 "\nWelcome to elCofre Digital Shopping Experiences.\n\n");
     }
-    public void startMenuAccess(){              //añadir al starUML
+    public void startMenuAccess(){
+        System.out.println("Starting program...\n");
         System.out.println("\n\t1) Manage Products"+
                 "\n\t2) Manage Shops"+
                 "\n\t3) Search Products"+

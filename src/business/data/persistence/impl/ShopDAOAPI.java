@@ -14,7 +14,7 @@ public class ShopDAOAPI implements business.data.persistence.ShopDAO {
     private final Gson gson;
 
     public ShopDAOAPI() {
-        this.apiUrl = "";//cambiar URL al de la api
+        this.apiUrl = "https://balandrau.salle.url.edu/dpoo/S1_Project_190/shops";//cambiar URL al de la api
         this.gson = new Gson();
     }
 

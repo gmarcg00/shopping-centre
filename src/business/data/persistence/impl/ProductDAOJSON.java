@@ -2,9 +2,8 @@ package business.data.persistence.impl;
 
 import business.data.model.Product;
 import business.data.persistence.ProductDAO;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import utils.JsonMapper;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -15,11 +14,9 @@ import java.util.List;
 
 public class ProductDAOJSON implements ProductDAO {
     private ArrayList<Product> productList;
-    private Gson gson;
     private final Path file_path;
 
     public ProductDAOJSON() {
-        gson = new GsonBuilder().setPrettyPrinting().create();
         file_path = Paths.get("info/product.json");
         productList = readProductsFromFile();
     }
@@ -33,7 +30,7 @@ public class ProductDAOJSON implements ProductDAO {
     //escribe en el json, no tocar
     public void writeProducts(ArrayList<Product> productList) {
         try (FileWriter writer = new FileWriter(String.valueOf(file_path))) {
-            gson.toJson(productList, writer);
+            JsonMapper.getMapper().toJson(productList, writer);
         } catch (IOException e) {
             System.out.println("ERROR couldn't create a new product");
         }
@@ -72,7 +69,7 @@ public class ProductDAOJSON implements ProductDAO {
     public ArrayList<Product> readProductsFromFile() {
         try (Reader reader = new FileReader(file_path.toFile())) {
             Type type = new TypeToken<List<Product>>(){}.getType();
-            productList = gson.fromJson(reader, type);
+            productList = JsonMapper.getMapper().fromJson(reader, type);
             return productList;
         } catch (IOException e) {
             e.printStackTrace();

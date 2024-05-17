@@ -28,11 +28,10 @@ public class Controller {
         this.cartManager = cartManager;
     }
 
-    public void run() throws IOException {
+    public void run(){
         int initialMenuOption = 0;
 
         uiManager.startMenu();         //ejecutar menu bienvenida
-        uiManager.startMenuApi();
 
         do{
             uiManager.apiOrJson();
@@ -48,34 +47,7 @@ public class Controller {
                     break;
             }
         }while(initialMenuOption!=1 && initialMenuOption!=2);
-
         mainMenu();
-
-
-
-        //if(!product_manager.checkApi()){
-        //    ui_manager.startMenuApiError();
-//
-        //    if(!product_manager.checkProductFile()){
-        //        ui_manager.startMenuError();
-//
-        //    }else{ui_manager.startMenuJson();}
-//
-        //}
-
-        if(productManager.checkStatus()){
-          uiManager.showMessage("Starting program...\n");
-
-        }
-    }
-
-    private void choosePersistence(int option){
-        try {
-            this.productManager = new ProductManagerImpl(option);
-            this.shopManager = new ShopManagerImpl(option);
-        }catch (IOException e){
-            uiManager.showMessage("Error loading the file\n");
-        }
     }
 
     private void mainMenu() {
@@ -252,8 +224,10 @@ public class Controller {
             uiManager.showShopRevenue(updated_shops.get(i), amount_updated.get(i));
         }
 
-        }
-        public float checkIva(float price,char category,float average_rating){
+    }
+
+
+    public float checkIva(float price,char category,float average_rating){
 
             if(category == 'a' || category == 'A'){
                 return (float) (price-(price*0.21));
@@ -273,7 +247,8 @@ public class Controller {
                 }
             }
             return -1;
-        }
+    }
+
     public String askForString(){
         String string="";
         try {
@@ -340,6 +315,7 @@ public class Controller {
             }
         }
     }
+
     public char askForCharacter(String string){
             char option;
             do {
@@ -349,6 +325,8 @@ public class Controller {
 
             return option;
     }
+
+
     public int askForInteger(int parameter) {            //parameter es para poder reutilizar la función en cada submenu
         int option=0;                                     //para no tener que hacer una función en función de las opciones distintas que aporte un submenu
         try {
@@ -365,6 +343,8 @@ public class Controller {
         }
         return option;
     }
+
+
     public int askForInt(){
         int option=0;                                     //para no tener que hacer una función en función de las opciones distintas que aporte un submenu
         try {
@@ -380,6 +360,7 @@ public class Controller {
         }
         return option;
     }
+
 
     public void expandCatalogue(){
         float amount;
@@ -413,6 +394,8 @@ public class Controller {
             System.out.println("This shop doesn't exist");
         }
     }
+
+
     public void reduceShopCatalogue(){
         int item_to_remove;
 
@@ -444,7 +427,8 @@ public class Controller {
         }else{
             uiManager.showMessage("\nThis shop doesn't exist.");
         }
-        }
+    }
+
     public float askForFloat() {
         while (true) {
             try {
@@ -460,6 +444,7 @@ public class Controller {
             }
         }
     }
+
     public void searchProducts() {
         int num_products = 0;
         int found, found_shop;
@@ -568,6 +553,7 @@ public class Controller {
             uiManager.showMessage("(ERROR) Couldn't find any product\n");
         }
     }
+
     public void subMenuReviews(ArrayList<Product> found_products) {
 
         if (!found_products.isEmpty()) {
@@ -601,6 +587,7 @@ public class Controller {
             }
         }
     }
+
     public void addReview(Product product){
         int review_stars;
         String stars;
@@ -620,6 +607,7 @@ public class Controller {
 
         productManager.addRating(product,review);
     }
+
     public void creaTenda(){
         int year;
         String shop_name;
@@ -659,6 +647,7 @@ public class Controller {
         Shop shop = new Shop(shop_name,description,year,model,loyalty_threshold,sponsor);
         shopManager.addShop(shop);
     }
+
     public void listShops(){
         int sub_menu_catalogue;
         int index;
@@ -718,6 +707,16 @@ public class Controller {
                 uiManager.showMessage("(ERROR) There are no shops yet\n");
             }
     }
+
+    private void choosePersistence(int option){
+        try {
+            this.productManager = new ProductManagerImpl(option);
+            this.shopManager = new ShopManagerImpl(option);
+        }catch (IOException e){
+            uiManager.showMessage("Error loading the file\n");
+        }
+    }
+
     public float calcAverageRating(String rating){
         int total = 0;
         int count=0;
